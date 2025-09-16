@@ -41,7 +41,7 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False # usually False; adjust if you have a reason to make it HttpOnly
 
 #HSTS - only enable after you have HTTPS and know what you're doing 
-SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30 # e.g., 30 days; increase aftertesting
+SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True 
 SECURE_HSTS_PRELOAD = False # set True only if you understand preload implications
 
