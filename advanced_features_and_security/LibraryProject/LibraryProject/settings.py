@@ -48,6 +48,8 @@ SECURE_HSTS_PRELOAD = False # set True only if you understand preload implicatio
 #SSL redirect (enable only if you actually have HTTPS) 
 SECURE_SSL_REDIRECT = True
 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 
 # Application definition
 
@@ -170,3 +172,4 @@ CSP_FONT_SRC = ("'self'",)
 CSP_CONNECT_SRC = ("'self'",) 
 CSP_BASE_URI = ("'self'",) 
 CSP_FRAME_ANCESTORS = ("'none'",)
+
