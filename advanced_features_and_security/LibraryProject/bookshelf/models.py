@@ -5,10 +5,10 @@ from django.db import models
 class Book(models.Model):
     title = models.CharField(max_length=200)
     author = models.CharField(max_length=100)
-    publication_year = models.IntegerField()
+    publication_date = models.IntegerField()
 
     def __str__(self):
-        return f"{self.title} by {self.author}, published in {self.publication_year}"
+        return f"{self.title} by {self.author}, published in {self.publication_date}"
 
 
 # advanced_features_and_security/models.py
@@ -51,3 +51,23 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+# bookshelf/models.py
+from django.db import models
+
+class Book(models.Model):
+    title = models.CharField(max_length=255)
+    author = models.CharField(max_length=255)
+    published_date = models.DateField()
+
+    class Meta:
+        permissions = [
+            ("can_view", "Can view book"),
+            ("can_create", "Can create book"),
+            ("can_edit", "Can edit book"),
+            ("can_delete", "Can delete book"),
+        ]
+
+    def __str__(self):
+        return self.title
