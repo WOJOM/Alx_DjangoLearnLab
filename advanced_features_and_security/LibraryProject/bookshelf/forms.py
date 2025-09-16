@@ -1,20 +1,23 @@
-# bookshelf/forms.py
 from django import forms
 from .models import Book
 
-class BookForm(forms.ModelForm):
+
+class ExampleForm(forms.ModelForm):
+    """
+    ExampleForm demonstrates safe handling of user input
+    to prevent SQL injection and XSS attacks.
+    """
+
     class Meta:
         model = Book
-        fields = ["title", "author", "published_date"]
+        fields = ['title', 'author', 'publication_date']
 
-class BookSearchForm(forms.Form):
-    q = forms.CharField(
-        required=False,
-        max_length=100,
-        widget=forms.TextInput(attrs={"placeholder": "Search title or author"})
-    )
-
-    def clean_q(self):
-        q = self.cleaned_data.get("q", "")
-        # Additional sanitization if needed
-        return q.strip()
+    def clean_title(self):
+        """
+        Example of input sanitization/validation.
+        Prevents malicious script injection.
+        """
+        title = self.cleaned_data.get("title")
+        if "<script>" in title.lower():
+            raise forms.ValidationError("Invalid input detected.")
+        return title
