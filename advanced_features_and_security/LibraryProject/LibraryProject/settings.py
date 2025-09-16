@@ -23,9 +23,30 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-kdrckn(^2qxbapa+-la2@n)lme7e*r%9fygtuq@ayj(3oj*nsz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["yourdomain.com", "www.yourdomain.com", "localhost"]
+
+
+SECURE_BROWSER_XSS_FILTER = True # enable XSS filter in modern browsers 
+X_FRAME_OPTIONS = "DENY" # disallow iframe embedding (prevent clickjacking)
+SECURE_CONTENT_TYPE_NOSNIFF = True # prevents content type sniffing
+
+
+
+#Cookies: ensure they're only sent over HTTPS (production) 
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True 
+SESSION_COOKIE_HTTPONLY = True 
+CSRF_COOKIE_HTTPONLY = False # usually False; adjust if you have a reason to make it HttpOnly
+
+#HSTS - only enable after you have HTTPS and know what you're doing 
+SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30 # e.g., 30 days; increase aftertesting
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True 
+SECURE_HSTS_PRELOAD = False # set True only if you understand preload implications
+
+#SSL redirect (enable only if you actually have HTTPS) 
+SECURE_SSL_REDIRECT = True
 
 
 # Application definition
@@ -126,3 +147,26 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "bookshelf.CustomUser"
 
+
+#Content Security Policy (option A: using django-csp) 
+# (Install django-csp in production: pip install django-csp) 
+INSTALLED_APPS += [ 
+    # ... other apps ...
+     "csp", # add this only if you install django-csp 
+     ]
+
+MIDDLEWARE = [ # ... existing middleware ... 
+    "csp.middleware.CSPMiddleware", # put near top
+      # ... other middleware ...
+     ]
+
+
+# Basic CSP example — tighten these values to match your asset hosts 
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'",) # add cdn domains if using them 
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'") # avoid 'unsafe-inline' if possible
+CSP_IMG_SRC = ("'self'", "data:")
+CSP_FONT_SRC = ("'self'",) 
+CSP_CONNECT_SRC = ("'self'",) 
+CSP_BASE_URI = ("'self'",) 
+CSP_FRAME_ANCESTORS = ("'none'",)

@@ -1,0 +1,19 @@
+<!-- form_example.html -->
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <!-- render fields manually or via form.as_p -->
+    {{ form.non_field_errors }}
+    <div>
+      <label for="id_title">Title</label>
+      {{ form.title }}
+      {{ form.title.errors }}
+    </div>
+  
+    <div>
+      <label for="id_author">Author</label>
+      {{ form.author }}
+    </div>
+  
+    <button type="submit">Save</button>
+  </form>
+  
