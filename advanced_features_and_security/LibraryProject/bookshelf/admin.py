@@ -6,10 +6,10 @@ from .models import Book
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
     # What fields show up in the admin list view
-    list_display = ('title', 'author', 'publication_year')
+    list_display = ('title', 'author', 'published_date')
 
     # Add filters for easy navigation
-    list_filter = ('publication_year', 'author')
+    list_filter = ('published_date', 'author')
 
     # Enable search functionality
     search_fields = ('title', 'author')
