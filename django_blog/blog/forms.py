@@ -40,3 +40,24 @@ class PostForm(forms.ModelForm):
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Post title'}),
             'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Write your content here...', 'rows': 8}),
         }
+
+
+from django import forms
+from .models import Comment
+
+class CommentForm(forms.ModelForm):
+    content = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 3}),
+        max_length=2000,
+        label="Your comment",
+    )
+
+    class Meta:
+        model = Comment
+        fields = ['content']
+
+    def clean_content(self):
+        content = self.cleaned_data.get('content', '').strip()
+        if not content:
+            raise forms.ValidationError("Comment cannot be empty.")
+        return content

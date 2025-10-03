@@ -36,3 +36,32 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+
+from django.db import models
+from django.conf import settings
+
+# Make sure your Post model exists in the same app or adjust the import accordingly
+# from .models import Post  <-- if Post is in same file adjust; normally Post is defined above
+
+class Comment(models.Model):
+    """A comment attached to a blog post."""
+    post = models.ForeignKey(
+        'Post',  # string form to avoid import cycles; change to Post if imported
+        on_delete=models.CASCADE,
+        related_name='comments'   # makes it easy: post.comments.all()
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Comment by {self.author} on {self.post} ({self.created_at:%Y-%m-%d %H:%M})"
