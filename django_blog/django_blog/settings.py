@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'blog',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [
@@ -146,3 +147,12 @@ TEMPLATES = [
         },
     },
 ]
+
+# After templates setting:
+LOGIN_REDIRECT_URL = 'profile'      # where to go after login
+LOGOUT_REDIRECT_URL = 'login'       # where to go after logout
+LOGIN_URL = 'login'
+
+# Media files (for profile_picture)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
