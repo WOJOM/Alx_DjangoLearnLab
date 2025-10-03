@@ -1,0 +1,12 @@
+<h2>Search results for "{{ request.GET.q }}"</h2>
+
+{% for post in posts %}
+  <article>
+    <h3><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h3>
+    <p>{{ post.content|truncatewords:30 }}</p>
+  </article>
+{% empty %}
+  <p>No results.</p>
+{% endfor %}
+
+{% include "pagination.html" %}

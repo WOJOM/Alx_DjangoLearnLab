@@ -137,3 +137,47 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def get_success_url(self):
         return reverse('post-detail', kwargs={'pk': self.object.post.pk})
+
+
+
+from django.db.models import Q
+from taggit.models import Tag
+from .models import Post
+
+class PostListView(ListView):
+    model = Post
+    template_name = 'blog/post_list.html'
+    paginate_by = 10
+    context_object_name = 'posts'
+
+class PostsByTagListView(ListView):
+    model = Post
+    template_name = 'blog/posts_by_tag.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        self.tag = self.kwargs.get('tag')
+        return Post.objects.filter(tags__name__iexact=self.tag).distinct()
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['tag'] = self.tag
+        return ctx
+
+class PostSearchListView(ListView):
+    model = Post
+    template_name = 'blog/search_results.html'
+    context_object_name = 'posts'
+    paginate_by = 10
+
+    def get_queryset(self):
+        q = self.request.GET.get('q', '').strip()
+        if not q:
+            return Post.objects.none()
+        # search title, content, and tags
+        return Post.objects.filter(
+            Q(title__icontains=q) |
+            Q(content__icontains=q) |
+            Q(tags__name__icontains=q)
+        ).distinct()

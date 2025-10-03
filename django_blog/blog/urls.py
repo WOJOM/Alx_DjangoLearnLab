@@ -37,3 +37,14 @@ urlpatterns = [
     path('comment/<int:pk>/update/', views.CommentUpdateView.as_view(), name='comment-update'),
     path('comment/<int:pk>/delete/', views.CommentDeleteView.as_view(), name='comment-delete'),
 ]
+
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.PostListView.as_view(), name='post-list'),
+    path('tag/<slug:tag>/', views.PostsByTagListView.as_view(), name='posts-by-tag'),
+    path('search/', views.PostSearchListView.as_view(), name='post-search'),
+    # ... your other urls (post detail, create, edit etc.)
+]

@@ -61,3 +61,11 @@ class CommentForm(forms.ModelForm):
         if not content:
             raise forms.ValidationError("Comment cannot be empty.")
         return content
+
+
+from .models import Post
+
+class PostForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ['title', 'content', 'tags']   # include tags
