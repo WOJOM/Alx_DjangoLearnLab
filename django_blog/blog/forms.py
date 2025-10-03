@@ -23,3 +23,20 @@ class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['bio', 'profile_picture']
+
+
+
+from .models import Post
+
+class PostForm(forms.ModelForm):
+    """
+    ModelForm for creating and editing Post instances.
+    The author will be set in the view (not through the form).
+    """
+    class Meta:
+        model = Post
+        fields = ['title', 'content']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Post title'}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Write your content here...', 'rows': 8}),
+        }
