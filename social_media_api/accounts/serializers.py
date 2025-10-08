@@ -1,23 +1,37 @@
+from imaplib import _Authenticator
 from rest_framework import serializers
-from django.contrib.auth import authenticate
-from .models import CustomUser
+from django.contrib.auth import get_user_model
+from rest_framework.authtoken.models import Token
 
-class RegisterSerializer(serializers.ModelSerializer):
+from social_media_api.accounts.models import CustomUser
+
+User = get_user_model()
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = ['id', 'username', 'email', 'password', 'bio', 'profile_picture']
 
     def create(self, validated_data):
-        user = CustomUser.objects.create_user(
+        # Create user with Django's create_user() method
+        user = User.objects.create_user(
             username=validated_data['username'],
-            email=validated_data.get('email'),
-            password=validated_data['password'],
-            bio=validated_data.get('bio', ''),
-            profile_picture=validated_data.get('profile_picture', ''),
+            email=validated_data.get('email', ''),
+            password=validated_data['password']
         )
+
+        # Add optional fields
+        user.bio = validated_data.get('bio', '')
+        user.profile_picture = validated_data.get('profile_picture', None)
+        user.save()
+
+        # Automatically generate authentication token
+        Token.objects.create(user=user)
+
         return user
+
 
 
 class LoginSerializer(serializers.Serializer):
@@ -25,7 +39,7 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        user = authenticate(username=data['username'], password=data['password'])
+        user = _Authenticator(username=data['username'], password=data['password'])
         if not user:
             raise serializers.ValidationError("Invalid username or password.")
         data['user'] = user
