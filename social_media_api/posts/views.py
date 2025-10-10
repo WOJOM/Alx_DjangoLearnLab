@@ -59,16 +59,23 @@ class CommentViewSet(viewsets.ModelViewSet):
         # ensure author is set to current user
         serializer.save(author=self.request.user)
 
-
 from rest_framework import viewsets, permissions
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
-
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        # If the user is authenticated, show posts from followed users + their own posts
+        if user.is_authenticated:
+            following_users = user.following.all()  # ✅ this is the key line
+            return Post.objects.filter(author__in=following_users).order_by('-created_at')
+        # Otherwise, show all posts
+        return Post.objects.all().order_by('-created_at')
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
