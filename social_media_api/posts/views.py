@@ -5,6 +5,8 @@ from rest_framework import viewsets, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+
+from social_media_api.notifications.models import Notification
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsOwnerOrReadOnly
@@ -59,9 +61,10 @@ class CommentViewSet(viewsets.ModelViewSet):
         # ensure author is set to current user
         serializer.save(author=self.request.user)
 
-from rest_framework import viewsets, permissions
-from .models import Post, Comment
+from rest_framework import viewsets, permissions, status
+from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
+from django.contrib.contenttypes.models import ContentType
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
@@ -100,3 +103,34 @@ class FeedView(generics.GenericAPIView):
         posts = Post.objects.filter(author__in=following_users).order_by('-created_at')
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
+
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def like(self, request, pk=None):
+        post = self.get_object()
+        user = request.user
+        like, created = Like.objects.get_or_create(post=post, user=user)
+        if not created:
+            return Response({'detail': 'Already liked'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # create notification for post author (don't notify self-likes)
+        if post.author != user:
+            Notification.objects.create(
+                recipient=post.author,
+                actor=user,
+                verb='liked your post',
+                target_content_type=ContentType.objects.get_for_model(post),
+                target_object_id=str(post.id)
+            )
+
+        return Response({'detail': 'Post liked', 'likes_count': post.likes.count()}, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def unlike(self, request, pk=None):
+        post = self.get_object()
+        user = request.user
+        deleted, _ = Like.objects.filter(post=post, user=user).delete()
+        if deleted == 0:
+            return Response({'detail': 'You have not liked this post.'}, status=status.HTTP_400_BAD_REQUEST)
+        # Optionally remove the notification or mark it as read - we'll keep notification record
+        return Response({'detail': 'Post unliked', 'likes_count': post.likes.count()}, status=status.HTTP_200_OK)

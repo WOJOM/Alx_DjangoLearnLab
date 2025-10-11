@@ -5,7 +5,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
-from .models import Post, Comment
+from .models import Post, Comment, Like
+from notifications.models import Notification
 
 User = get_user_model()
 
@@ -47,3 +48,19 @@ class PostsCommentsAPITest(APITestCase):
         self.client.force_authenticate(self.user2)
         resp = self.client.patch(url, {'content': 'edited'})
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+
+class LikeNotificationTest(APITestCase):
+    def setUp(self):
+        self.user1 = User.objects.create_user('alice', password='pass')
+        self.user2 = User.objects.create_user('bob', password='pass')
+        self.post = Post.objects.create(author=self.user1, title='P', content='C')
+        self.like_url = reverse('post-like', args=[self.post.id])  # if using DefaultRouter, action name is <basename>-like
+
+    def test_like_creates_notification(self):
+        self.client.force_authenticate(self.user2)
+        resp = self.client.post(self.like_url)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        # Notification exists for post author
+        notif = Notification.objects.filter(recipient=self.user1, actor=self.user2, verb__icontains='liked').first()
+        self.assertIsNotNone(notif)

@@ -1,3 +1,4 @@
+from urllib import request
 from django.shortcuts import get_object_or_404, render
 
 # Create your views here.
@@ -66,3 +67,18 @@ class UnfollowView(generics.GenericAPIView):
             return Response({"error": "You cannot unfollow yourself."}, status=status.HTTP_400_BAD_REQUEST)
         request.user.following.remove(user_to_unfollow)
         return Response({"message": f"You have unfollowed {user_to_unfollow.username}."}, status=status.HTTP_200_OK)
+
+
+from notifications.models import Notification
+from django.contrib.contenttypes.models import ContentType
+
+# inside FollowView.post()
+request.user.following.add(user_to_follow)
+if user_to_follow != request.user:
+    Notification.objects.create(
+        recipient=user_to_follow,
+        actor=request.user,
+        verb='started following you',
+        target_content_type=None,
+        target_object_id=None
+    )
