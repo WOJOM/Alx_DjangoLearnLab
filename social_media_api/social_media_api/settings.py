@@ -183,3 +183,7 @@ SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', '') == '1'
 SECURE_HSTS_SECONDS = 31536000  # one year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
+
+
+# Dynamic port for deployment environments like Heroku or Docker
+PORT = int(os.environ.get("PORT", 8000))
